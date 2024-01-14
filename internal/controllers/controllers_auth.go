@@ -12,10 +12,10 @@ import (
 	"github.com/aswinbennyofficial/attendease/internal/utility"
 )
 
-func HandleSignin(w http.ResponseWriter, r *http.Request) {
+func HandleAdminSignin(w http.ResponseWriter, r *http.Request) {
 
 	// Instance of the Credential struct
-	var creds models.Credentials
+	var creds models.LoginCreds
 	// Get the JSON body and decode into creds
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
@@ -23,16 +23,24 @@ func HandleSignin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+
 	// Get the expected password hash from database
-	expectedPasswordHash, err := database.GetPasswordHashFromDb(creds.Username)
+	expectedUsername ,expectedPasswordHash, err := database.GetHashAndUsernameFromDb(creds.Organisation)
 	if err != nil {
 		log.Println("Error while getting password from database: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		if err.Error() == "User does not exist" {
-			w.Write([]byte("User does not exist"))
+		if err.Error() == "Organisation does not exist" {
+			w.Write([]byte("Organisation does not exist"))
 			return
 		}
 		w.Write([]byte("Error while getting password from database"))
+		return
+	}
+
+	if expectedUsername != creds.Username {
+		log.Println("Incorrect username")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("Incorrect username"))
 		return
 	}
 
@@ -45,7 +53,7 @@ func HandleSignin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a new JWT token
-	signedToken, err := utility.GenerateToken(creds.Username)
+	signedToken, err := utility.GenerateToken(creds.Organisation,creds.Username,true,false)
 	if err != nil {
 		log.Println("ERROR OCCURRED WHILE CREATING JWT TOKEN: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -53,7 +61,7 @@ func HandleSignin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("JWT GENERATED FOR %s", creds.Username)
+	log.Printf("JWT GENERATED FOR %s", creds.Organisation)
 
 	// TODO
 	// Setting expiration time for cookie
@@ -81,7 +89,7 @@ func HandleRefresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate a new JWT token
-	signedToken, err := utility.GenerateToken(claims.Username)
+	signedToken, err := utility.GenerateToken(claims.Org,claims.Username,claims.Admin,claims.Employee)
 	if err != nil {
 		log.Println("ERROR OCCURRED WHILE CREATING JWT TOKEN: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -112,35 +120,63 @@ func HandleLogout(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Logout successful"))
 }
 
-func HandleSignup(w http.ResponseWriter, r *http.Request) {
+func HandleAdminSignup(w http.ResponseWriter, r *http.Request) {
 	// Instance of the NewUser struct
-	var user models.NewUser
+	var org models.NewUser
 	// Get the JSON body and decode into credentials
-	err := json.NewDecoder(r.Body).Decode(&user)
+	err := json.NewDecoder(r.Body).Decode(&org)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// Check if username already exists
-	isUserExist, err := database.DoesUserExist(user.Username)
+	if org.Organisation==""{
+		log.Println("Organisation cannot be empty")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Organisation cannot be empty"))
+		return
+	}
+	
+	if org.Username==""{
+		log.Println("Username cannot be empty")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Username cannot be empty"))
+		return
+	}
+
+	// Check if organisation already exists
+	isOrgExist, err := database.DoesExist("organisation",org.Organisation)
 	if err != nil {
 		log.Println("Error while checking if user exists: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if isUserExist {
-		log.Println("User already exists")
+	if isOrgExist {
+		log.Println("Organisation already exists")
 		w.WriteHeader(http.StatusConflict)
-		w.Write([]byte("User already exists"))
+		w.Write([]byte("Organisation already exists"))
 		return
 	}
-	log.Println("User does not exist")
+	log.Println("Organisation does not exist")
+
+	// Check if username already exists
+	isUsernameExist, err := database.DoesExist("username",org.Username)
+	if err != nil {
+		log.Println("Error while checking if user exists: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if isUsernameExist {
+		log.Println("Username already exists")
+		w.WriteHeader(http.StatusConflict)
+		w.Write([]byte("Username already exists"))
+		return
+	}
 
 	// Hashing the password with the default cost of 10
-	hashedPassword, err := utility.HashPassword(user.Password)
+	hashedPassword, err := utility.HashPassword(org.Password)
 	if err != nil {
 		log.Println("Error while hashing password: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -149,21 +185,31 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Replacing existing password with hashed password
-	user.Password = hashedPassword
+	org.Password = hashedPassword
 
-	// Adding user and details to database
-	err = database.AddUserToDb(user)
-	if err != nil {
-		log.Println("Error while adding user to database: ", err)
+	org.IsVerified = false
+	org.VerifyCode,err = utility.CreateRandomString(15)
+
+	if err != nil {	
+		log.Println("Error while creating random string: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error while adding user to database"))
+		w.Write([]byte("Error while creating verification string"))
 		return
 	}
 
-	log.Println("User added to database")
+	// Adding user and details to database
+	err = database.AddUserToDb(org)
+	if err != nil {
+		log.Println("Error while adding Oreganisation to database: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error while adding Organisation to database"))
+		return
+	}
+
+	log.Println("Organisation added to database")
 
 	// Generate a new JWT token
-	signedToken, err := utility.GenerateToken(user.Username)
+	signedToken, err := utility.GenerateToken(org.Organisation,org.Username,true,false)
 	if err != nil {
 		log.Println("ERROR OCCURRED WHILE CREATING JWT TOKEN: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -181,6 +227,6 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("User added to database"))
+	w.Write([]byte("Organisation signup successful"))
 
 }

@@ -10,7 +10,7 @@ import (
 )
 
 
-func HandleWelcome(w http.ResponseWriter, r *http.Request){
+func HandlePrivate(w http.ResponseWriter, r *http.Request){
 	// Get claims from context
 	claims, ok := r.Context().Value("claims").(*models.Claims)
 	if !ok {

@@ -55,12 +55,15 @@ func ParseAndValidateJWT(r *http.Request) (*models.Claims, error) {
 }
 
 // Generate a new JWT token
-func GenerateToken(username string) (string, error) {
+func GenerateToken(organisation string,username string,isAdmin bool, isEmployee bool) (string, error) {
 	// Setting expiration time to be 5 minutes from now
 	expirationTime := time.Now().Add(time.Duration(config.LoadJwtExpiresIn()) * time.Minute)
 
 	claims := &models.Claims{
 		Username: username,
+		Org: organisation,
+		Admin: isAdmin,
+		Employee: isEmployee,
 		RegisteredClaims: jwt.RegisteredClaims{
 			// In JWT, the expiry time is expressed as unix milliseconds
 			ExpiresAt: jwt.NewNumericDate(expirationTime),

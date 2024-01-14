@@ -33,19 +33,19 @@ func AddUserToDb(newuser models.NewUser) error {
 }
 
 // GetPasswordHashFromDb gets the password hash from the database
-func GetPasswordHashFromDb(username string) (string, error) {
+func GetHashAndUsernameFromDb(organisation string) (string,string, error) {
 	// Checking if user exists
-	isUserExist, err := DoesUserExist(username)
+	isUserExist, err := DoesExist("organisation",organisation)
 	if err != nil {
 		log.Println("GetPasswordHashFromDb() :", err)
-		return "", err
+		return "","", err
 	}
 	if isUserExist == false {
-		return "", errors.New("User does not exist")
+		return "","", errors.New("Organisation does not exist")
 	}
 
 	// Creating a filter
-	filter := bson.D{{"username", username}}
+	filter := bson.D{{"organisation", organisation}}
 
 	// Instance of the NewUser struct
 	var result models.NewUser
@@ -54,17 +54,18 @@ func GetPasswordHashFromDb(username string) (string, error) {
 	err = coll.FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
 		log.Println("GetPasswordHashFromDb() ", err)
-		return "", err
+		return "","", err
 	}
 
-	return result.Password, nil
+
+	return result.Username,result.Password, nil
 }
 
 // DoesUserExist checks if a user exists in the database
-func DoesUserExist(username string) (bool, error) {
+func DoesExist(query string,username string) (bool, error) {
 	opts := options.Count().SetHint("_id_")
 	// Creating a filter
-	filter := bson.D{{"username", username}}
+	filter := bson.D{{query, username}}
 	// Counting the number of documents
 	count, err := coll.CountDocuments(context.TODO(), filter, opts)
 	if err != nil {

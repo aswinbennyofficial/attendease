@@ -24,7 +24,7 @@ func LoginRequired(next http.Handler) http.Handler {
 		expirationThreshold := time.Now().Add(2 * time.Minute)
 		if claims.ExpiresAt.Time.Before(expirationThreshold) {
 			// Token is nearing expiration, generate a new token
-			signedToken, err := utility.GenerateToken(claims.Username)
+			signedToken, err := utility.GenerateToken(claims.Org,claims.Username,claims.Admin,claims.Employee)
 			if err != nil {
 				log.Println("ERROR OCCURRED WHILE CREATING JWT TOKEN: ", err)
 				w.WriteHeader(http.StatusInternalServerError)

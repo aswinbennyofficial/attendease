@@ -1,26 +1,31 @@
 package models
 
 import(
-	"github.com/golang-jwt/jwt/v5"
+	"time"
 )
 
-
-
-// Create a struct to read the username and password from the request body
-type Credentials struct {
-	Password string `json:"password"`
-	Username string `json:"username"`
+type Events struct{
+	EventID string `json:"eventid"`
+	Organisation string `json:"organisation"`
+	Name string `json:"name"`
+	Description string `json:"description"`
+	EventTime string `json:"eventtime"`
+	Location string `json:"location"`
 }
 
-// Create a struct that will be encoded to a JWT.
-// We add jwt.RegisteredClaims as an embedded type, to provide fields like expiry time
-type Claims struct {
-	Username string `json:"username"`
-	jwt.RegisteredClaims
+type ScanInfo struct{
+	Timestamp time.Time `json:"timestamp" bson:"timestamp"`
+	ScannedBy string `json:"scannedby"`
 }
 
-// Struct to store the user data in database (signup)
-type NewUser struct{
-	Username string `json:"username"`
-	Password string `json:"password"`
-} 
+type Particapants struct{
+	ParticapantID string `json:"particapantid"`
+	Organisation string `json:"organisation"`
+	Name string `json:"name"`
+	Email string `json:"email"`
+	EventID string `json:"eventid"`
+	ScansCount int `json:"scancount"`
+	ScansInfo []ScanInfo `json:"scansinfo"`
+
+}
+
