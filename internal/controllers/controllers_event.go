@@ -41,7 +41,7 @@ func HandleCreateEvent(w http.ResponseWriter, r *http.Request) {
 	doesEventIDexist:=true
 	for doesEventIDexist{
 		event.EventId,err=utility.CreateRandomString(6)
-		doesEventIDexist,err= database.DoesExist("eventid",event.EventId)
+		doesEventIDexist,err= database.DoesExistInAuthColl("eventid",event.EventId)
 	}
 	log.Println("EventID generated: ",event.EventId)
 

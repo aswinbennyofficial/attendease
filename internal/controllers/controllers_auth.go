@@ -146,7 +146,7 @@ func HandleAdminSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if organisation already exists
-	isOrgExist, err := database.DoesExist("organisation",org.Organisation)
+	isOrgExist, err := database.DoesExistInAuthColl("organisation",org.Organisation)
 	if err != nil {
 		log.Println("Error while checking if user exists: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -162,7 +162,7 @@ func HandleAdminSignup(w http.ResponseWriter, r *http.Request) {
 	log.Println("Organisation does not exist")
 
 	// Check if username already exists
-	isUsernameExist, err := database.DoesExist("username",org.Username)
+	isUsernameExist, err := database.DoesExistInAuthColl("username",org.Username)
 	if err != nil {
 		log.Println("Error while checking if user exists: ", err)
 		w.WriteHeader(http.StatusInternalServerError)

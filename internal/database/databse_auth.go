@@ -35,7 +35,7 @@ func AddUserToDb(newuser models.NewUser) error {
 // GetPasswordHashFromDb gets the password hash from the database
 func GetHashAndUsernameFromDb(organisation string) (string,string, error) {
 	// Checking if user exists
-	isUserExist, err := DoesExist("organisation",organisation)
+	isUserExist, err := DoesExistInAuthColl("organisation",organisation)
 	if err != nil {
 		log.Println("GetPasswordHashFromDb() :", err)
 		return "","", err
@@ -62,10 +62,10 @@ func GetHashAndUsernameFromDb(organisation string) (string,string, error) {
 }
 
 // DoesUserExist checks if a user exists in the database
-func DoesExist(query string,username string) (bool, error) {
+func DoesExistInAuthColl(query string,value string) (bool, error) {
 	opts := options.Count().SetHint("_id_")
 	// Creating a filter
-	filter := bson.D{{query, username}}
+	filter := bson.D{{query, value}}
 	// Counting the number of documents
 	count, err := coll.CountDocuments(context.TODO(), filter, opts)
 	if err != nil {
