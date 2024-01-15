@@ -16,12 +16,14 @@ type Event struct {
 	
 }
 
+
+
 type ScanInfo struct{
 	Timestamp time.Time `json:"timestamp" bson:"timestamp"`
 	ScannedBy string `json:"scannedby"`
 }
 
-type Particapants struct{
+type Particpants struct{
 	ParticapantID string `json:"particapantid"`
 	Organisation string `json:"organisation"`
 	Name string `json:"name"`

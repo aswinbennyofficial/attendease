@@ -74,6 +74,16 @@ func HandleGetEvents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("Events fetched from database: ",eventslist)
+	
+	
+	eventListMap := make(map[string]models.Event)
+
+	for _,event:=range eventslist{
+		eventListMap[event.EventId]=event
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(eventslist)
+	
+	json.NewEncoder(w).Encode(eventListMap)
 }
