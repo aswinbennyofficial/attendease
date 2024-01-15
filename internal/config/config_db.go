@@ -15,11 +15,11 @@ func LoadMongoDBURI() string{
 	return DB_URI
 }
 
-func LoadMongoDBNameAuth() string{
+func LoadMongoDBName() string{
 	
-	DB_NAME:=os.Getenv("DB_FOR_AUTH")
+	DB_NAME:=os.Getenv("DB_NAME")
 	if DB_NAME==""{
-		log.Println("Error loading DB_FOR_AUTH in config.LoadMongoDBName()")
+		log.Println("Error loading DB_NAME in config.LoadMongoDBName()")
 		return "jwt-auth-golang"
 	}
 	return DB_NAME
@@ -32,6 +32,16 @@ func LoadMongoDBCollectionNameAuth() string{
 	if DB_COLLECTION_NAME==""{
 		log.Println("Error loading DB_COLLECTION_FOR_AUTH in config.LoadMongoDBCollectionName()")
 		return "users"
+	}
+	return DB_COLLECTION_NAME
+}
+
+func LoadMongoDBCollectionEvent() string{
+	
+	DB_COLLECTION_NAME:=os.Getenv("DB_COLLECTION_FOR_EVENT")
+	if DB_COLLECTION_NAME==""{
+		log.Println("Error loading DB_COLLECTION_FOR_EVENT in config.LoadMongoDBCollectionName()")
+		return "events"
 	}
 	return DB_COLLECTION_NAME
 }

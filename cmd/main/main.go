@@ -18,13 +18,15 @@ func main() {
 	config.LoadEnv()
 
 	DB_URI := config.LoadMongoDBURI()
-	DB_FOR_AUTH := config.LoadMongoDBNameAuth()
+	DB_NAME := config.LoadMongoDBName()
 	DB_COLLECTION_FOR_AUTH := config.LoadMongoDBCollectionNameAuth()
+	DB_COLLECTION_FOR_EVENT:=config.LoadMongoDBCollectionEvent()
 
 	// Creating a MongoDB client using Db() function in db.go
 	client := database.DbConnect(DB_URI)
 
-	database.InitLoginCollection(client, DB_FOR_AUTH, DB_COLLECTION_FOR_AUTH)
+	database.InitLoginCollection(client, DB_NAME, DB_COLLECTION_FOR_AUTH)
+	database.InitEventCollection(client,DB_NAME,DB_COLLECTION_FOR_EVENT)
 
 	// Initialize Chi router
 	r := chi.NewRouter()

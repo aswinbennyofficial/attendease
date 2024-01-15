@@ -19,6 +19,10 @@ func Routes(r *chi.Mux) {
 	r.Post("/api/admin/refresh", controllers.HandleRefresh)
 	r.Post("/api/logout", controllers.HandleLogout)
 
+	// API for events
+	r.With(middleware.LoginRequired).Post("/api/events", controllers.HandleCreateEvent) // Create event
+	r.With(middleware.LoginRequired).Get("/api/events", controllers.HandleGetEvents)   // Get all events
+
 	
 
 }

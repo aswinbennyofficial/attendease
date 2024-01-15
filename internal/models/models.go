@@ -4,13 +4,16 @@ import(
 	"time"
 )
 
-type Events struct{
-	EventID string `json:"eventid"`
-	Organisation string `json:"organisation"`
-	Name string `json:"name"`
-	Description string `json:"description"`
-	EventTime string `json:"eventtime"`
-	Location string `json:"location"`
+
+type Event struct {
+	EventId string `json:"eventid" bson:"eventid"`
+	EventName string `json:"eventname" bson:"eventname"`
+	EventDescription string `json:"eventdescription" bson:"eventdescription"`
+	EventLocation string `json:"eventlocation" bson:"eventlocation"`
+	EventDate string `json:"eventdate" bson:"eventdate"`
+	EventTime string `json:"eventtime" bson:"eventtime"`
+	Organisation string `json:"organisation" bson:"organisation"`
+	
 }
 
 type ScanInfo struct{

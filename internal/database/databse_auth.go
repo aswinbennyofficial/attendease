@@ -78,3 +78,4 @@ func DoesExist(query string,username string) (bool, error) {
 		return true, nil
 	}
 }
+
