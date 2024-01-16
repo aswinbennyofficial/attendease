@@ -22,6 +22,7 @@ func main() {
 	DB_COLLECTION_FOR_AUTH := config.LoadMongoDBCollectionNameAuth()
 	DB_COLLECTION_FOR_EVENT:=config.LoadMongoDBCollectionEvent()
 	DB_COLLECTION_FOR_PARTICIPANT:=config.LoadMongoDBCollectionParticipant()
+	DB_COLLECTION_FOR_EMPLOYEE:=config.LoadMongoDBCollectionEmployee()
 
 	// Creating a MongoDB client using Db() function in db.go
 	client := database.DbConnect(DB_URI)
@@ -29,6 +30,7 @@ func main() {
 	database.InitLoginCollection(client, DB_NAME, DB_COLLECTION_FOR_AUTH)
 	database.InitEventCollection(client,DB_NAME,DB_COLLECTION_FOR_EVENT)
 	database.InitParticipantCollection(client,DB_NAME,DB_COLLECTION_FOR_PARTICIPANT)
+	database.InitEmployeeCollection(client,DB_NAME,DB_COLLECTION_FOR_EMPLOYEE)
 
 	// Initialize Chi router
 	r := chi.NewRouter()

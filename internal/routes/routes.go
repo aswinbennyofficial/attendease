@@ -25,6 +25,9 @@ func Routes(r *chi.Mux) {
 	r.With(middleware.AdminLoginRequired).Get("/api/events/{eventid}", controllers.HandleGetAnEvent) // Get event by eventid
 	r.With(middleware.AdminLoginRequired).Post("/api/events/{eventid}/participants", controllers.HandleUploadParticipants) // Upload participants list to event
 
+
+	// API for creating employees
+	r.With(middleware.AdminLoginRequired).Post("/api/employees", controllers.HandleCreateEmployee) // Create employee
 	
 
 }

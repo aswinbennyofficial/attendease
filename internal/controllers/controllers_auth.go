@@ -198,7 +198,7 @@ func HandleAdminSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Adding user and details to database
-	err = database.AddUserToDb(org)
+	err = database.AddAdminToDb(org)
 	if err != nil {
 		log.Println("Error while adding Oreganisation to database: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -229,4 +229,88 @@ func HandleAdminSignup(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Organisation signup successful"))
 
+}
+
+
+func HandleCreateEmployee(w http.ResponseWriter, r *http.Request){
+	// Get claims from context
+	claims, ok := r.Context().Value("claims").(*models.Claims)
+	if !ok {
+		log.Println("Claims not found in context")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Claims not found in context"))
+		return
+	}
+	
+	// Instance of the NewUser struct
+	var employee models.NewUser
+	// Get the JSON body and decode into credentials
+	err := json.NewDecoder(r.Body).Decode(&employee)
+	if err != nil {
+		// If the structure of the body is wrong, return an HTTP error
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	
+	
+	if employee.Username==""{
+		log.Println("Username cannot be empty")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Username cannot be empty"))
+		return
+	}
+
+	
+
+	// Check if username already exists
+	isUsernameExist, err := database.DoesEmpExist(claims.Org,employee.Username)
+	if err != nil {
+		log.Println("Error while checking if user exists: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if isUsernameExist {
+		log.Println("Username already exists")
+		w.WriteHeader(http.StatusConflict)
+		w.Write([]byte("Username already exists"))
+		return
+	}
+
+	// Hashing the password with the default cost of 10
+	hashedPassword, err := utility.HashPassword(employee.Password)
+	if err != nil {
+		log.Println("Error while hashing password: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error while hashing password"))
+		return
+	}
+
+	// Replacing existing password with hashed password
+	employee.Password = hashedPassword
+	employee.Organisation = claims.Org
+	employee.IsVerified = false
+	employee.VerifyCode,err = utility.CreateRandomString(15)
+
+	if err != nil {	
+		log.Println("Error while creating random string: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error while creating verification string"))
+		return
+	}
+
+	// Adding user and details to database
+	err = database.AddEmployeeToDb(employee)
+	if err != nil {
+		log.Println("Error while adding Employee to database: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error while adding Employee to database"))
+		return
+	}
+
+	log.Println("Employee added to database")
+
+	
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Employee signup successful"))	
 }

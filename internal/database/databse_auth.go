@@ -14,6 +14,7 @@ import (
 
 // has mongodb collection object for login
 var coll *mongo.Collection
+var employeecoll *mongo.Collection
 
 // InitLoginCollection initializes the mongodb collection for login
 func InitLoginCollection(client *mongo.Client, dbName, collName string) error {
@@ -22,8 +23,14 @@ func InitLoginCollection(client *mongo.Client, dbName, collName string) error {
 	return nil
 }
 
-// AddUserToDb adds a new user to the database
-func AddUserToDb(newuser models.NewUser) error {
+func InitEmployeeCollection(client *mongo.Client, dbName, collName string) error {
+	// Initialisinbg nongodb collection object for login
+	employeecoll = client.Database(dbName).Collection(collName)
+	return nil
+}
+
+// AddUserToDb adds a new admin to the database
+func AddAdminToDb(newuser models.NewUser) error {
 	result, err := coll.InsertOne(context.TODO(), newuser)
 	if err != nil {
 		return (err)
@@ -79,3 +86,30 @@ func DoesExistInAuthColl(query string,value string) (bool, error) {
 	}
 }
 
+// Check if Employee exist in the same table
+func DoesEmpExist(org string,username string) (bool, error) {
+	opts := options.Count().SetHint("_id_")
+	// Creating a filter
+	filter := bson.D{{"$and", bson.A{     bson.D{{"organisation", org}},     bson.D{{"username", username}}, }}}
+	// Counting the number of documents
+	count, err := employeecoll.CountDocuments(context.TODO(), filter, opts)
+	if err != nil {
+		log.Println(err)
+		return true, err
+	}
+	if count == 0 {
+		return false, nil
+	} else {
+		return true, nil
+	}
+}
+
+
+func AddEmployeeToDb(newuser models.NewUser) error {
+	result, err := employeecoll.InsertOne(context.TODO(), newuser)
+	if err != nil {
+		return (err)
+	}
+	log.Println(result.InsertedID)
+	return nil
+}

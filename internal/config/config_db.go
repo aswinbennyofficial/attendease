@@ -55,3 +55,14 @@ func LoadMongoDBCollectionParticipant() string{
 	}
 	return DB_COLLECTION_NAME
 }
+
+
+func LoadMongoDBCollectionEmployee() string{
+	
+	DB_COLLECTION_NAME:=os.Getenv("DB_COLLECTION_FOR_EMPLOYEE")
+	if DB_COLLECTION_NAME==""{
+		log.Println("Error loading DB_COLLECTION_FOR_EMPLOYEE in config.LoadMongoDBCollectionName()")
+		return "employees"
+	}
+	return DB_COLLECTION_NAME
+}

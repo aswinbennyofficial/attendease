@@ -27,23 +27,8 @@ git clone https://github.com/aswinbennyofficial/attendease.git
 
 2. Install dependencies:
 
-```bash
-go get github.com/joho/godotenv
-```
-```bash
-go get go.mongodb.org/mongo-driver/mongo
-```
-
-```bash
-go get github.com/golang-jwt/jwt/v5
-```
-
-```bash
-go get golang.org/x/crypto/bcrypt
-``` 
-
-```bash
-go get github.com/go-chi/chi/v5
+```go
+go mod tidy
 ```
 
 
