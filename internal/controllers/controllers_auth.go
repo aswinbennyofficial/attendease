@@ -314,3 +314,32 @@ func HandleCreateEmployee(w http.ResponseWriter, r *http.Request){
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Employee signup successful"))	
 }
+
+func HandleGetEmployees(w http.ResponseWriter, r *http.Request){
+	// Get claims from context
+	claims, ok := r.Context().Value("claims").(*models.Claims)
+	if !ok {
+		log.Println("Claims not found in context")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Claims not found in context"))
+		return
+	}
+
+	employeeslist,err:=database.GetEmployeesFromDb(claims.Org)
+	if err!=nil{
+		log.Println("Error getting employees from database: ",err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Println("Employees fetched from database: ",employeeslist)
+
+	var employeeRes=models.EmployeeResponse{
+		Employees:employeeslist,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	
+	json.NewEncoder(w).Encode(employeeRes)
+
+}

@@ -113,3 +113,31 @@ func AddEmployeeToDb(newuser models.NewUser) error {
 	log.Println(result.InsertedID)
 	return nil
 }
+
+func GetEmployeesFromDb(organisation string) ([]string, error) {
+	// Creating a filter
+	filter := bson.D{{"organisation", organisation}}
+
+	// Instance of the NewUser struct
+	var results []string
+
+	// Find and decode from mongodb
+	cur, err := employeecoll.Find(context.Background(), filter)
+	if err != nil {
+		log.Println("GetEmployeesFromDb() ", err)
+		return results, err
+	}
+
+	// Iterating through the results
+	for cur.Next(context.Background()) {
+		var result models.NewUser
+		err := cur.Decode(&result)
+		if err != nil {
+			log.Println("GetEmployeesFromDb() ", err)
+			return results, err
+		}
+		results = append(results, result.Username)
+	}
+
+	return results, nil
+}

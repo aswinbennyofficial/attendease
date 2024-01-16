@@ -34,3 +34,6 @@ type Participants struct{
 
 }
 
+type EmployeeResponse struct{
+	Employees []string `json:"employees"`
+}
