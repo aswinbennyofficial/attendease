@@ -175,7 +175,7 @@ func HandleUploadParticipants(w http.ResponseWriter, r *http.Request){
 	defer file.Close()
 	log.Println("File uploaded: ",fileinfo.Filename)
 
-	var participants []models.Participants
+	var participants []interface{}
 
 	// Creating a map to prevent duplicate entries
 	uidMap := make(map[string]bool)
@@ -190,6 +190,8 @@ func HandleUploadParticipants(w http.ResponseWriter, r *http.Request){
 			http.Error(w, "Error reading CSV file", http.StatusInternalServerError)
 			return
 		}
+		
+		
 		var participant models.Participants
 
 		// Generating a unique id
@@ -224,13 +226,8 @@ func HandleUploadParticipants(w http.ResponseWriter, r *http.Request){
 
 	log.Println("Participants list generated: ",participants)
 
-	// Convert the array to []interface{}
-	var participantInterfaceSlice []interface{}
-	for _, participant := range participants {
-		participantInterfaceSlice = append(participantInterfaceSlice, participant)
-	}
 	
-	err=database.AddParticipantsToDb(participantInterfaceSlice)
+	err=database.AddParticipantsToDb(participants)
 	if err!=nil{
 		log.Println("Error adding participants to database: ",err)
 		w.WriteHeader(http.StatusInternalServerError)
