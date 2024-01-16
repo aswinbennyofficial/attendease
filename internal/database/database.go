@@ -49,3 +49,17 @@ func GetEventsFromDb(organisation string) ([]models.Event, error) {
 	}
 	return events, nil
 }
+
+func GetAnEventFromDb(organisation string,eventid string) (models.Event, error) {
+	// Getting an event from the database
+	//filter := bson.D{{"eventid", eventid} , {"organisation", organisation}}
+	filter :=bson.D{{"$and", bson.A{     bson.D{{"eventid", eventid}},     bson.D{{"organisation", organisation}}, }}}
+	
+	var event models.Event
+	err := Eventcoll.FindOne(context.Background(), filter).Decode(&event)
+	if err != nil {
+		log.Println("Error while getting event from database: ", err)
+		return event, err
+	}
+	return event, nil
+}

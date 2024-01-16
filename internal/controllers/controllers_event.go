@@ -9,6 +9,8 @@ import (
 	"github.com/aswinbennyofficial/attendease/internal/database"
 	"github.com/aswinbennyofficial/attendease/internal/models"
 	"github.com/aswinbennyofficial/attendease/internal/utility"
+	"github.com/go-chi/chi/v5"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func HandleCreateEvent(w http.ResponseWriter, r *http.Request) {
@@ -78,12 +80,52 @@ func HandleGetEvents(w http.ResponseWriter, r *http.Request) {
 	
 	eventListMap := make(map[string]models.Event)
 
-	for _,event:=range eventslist{
-		eventListMap[event.EventId]=event
+	for _,events:=range eventslist{
+		eventListMap[events.EventId]=events
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	
 	json.NewEncoder(w).Encode(eventListMap)
+}
+
+func HandleGetAnEvent(w http.ResponseWriter, r *http.Request) {
+	// Get claims from context
+	claims, ok := r.Context().Value("claims").(*models.Claims)
+	if !ok {
+		log.Println("Claims not found in context")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Claims not found in context"))
+		return
+	}
+
+	eventid:=chi.URLParam(r, "eventid")
+	if eventid==""{
+		log.Println("EventID is empty")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+
+	event,err:=database.GetAnEventFromDb(claims.Org,eventid)
+
+	if err!=nil{
+		if err == mongo.ErrNoDocuments {
+			log.Println("Event not found in database: ",err)
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Event not found in database"))
+			return
+		}
+		log.Println("Error getting event from database: ",err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Println("Event fetched from database: ",event)
+	
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	
+	json.NewEncoder(w).Encode(event)
 }
