@@ -23,7 +23,7 @@ type ScanInfo struct{
 	ScannedBy string `json:"scannedby"`
 }
 
-type Particpants struct{
+type Participants struct{
 	ParticapantID string `json:"particapantid"`
 	Organisation string `json:"organisation"`
 	Name string `json:"name"`

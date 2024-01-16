@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"encoding/csv"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 
@@ -9,6 +11,7 @@ import (
 	"github.com/aswinbennyofficial/attendease/internal/database"
 	"github.com/aswinbennyofficial/attendease/internal/models"
 	"github.com/aswinbennyofficial/attendease/internal/utility"
+	
 	"github.com/go-chi/chi/v5"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -128,4 +131,114 @@ func HandleGetAnEvent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	
 	json.NewEncoder(w).Encode(event)
+}
+
+func HandleUploadParticipants(w http.ResponseWriter, r *http.Request){
+	// Get claims from context
+	claims, ok := r.Context().Value("claims").(*models.Claims)
+	if !ok {
+		log.Println("Claims not found in context")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Claims not found in context"))
+		return
+	}
+
+	
+	log.Println("Claims: ",claims.Org)
+
+	// Get eventid from URL
+	eventid:=chi.URLParam(r, "eventid")
+	if eventid==""{
+		log.Println("EventID is empty")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	
+	// Parse multipart form
+	err:=r.ParseMultipartForm(10<<20)
+	if err!=nil{
+		log.Println("Error parsing multipart form: ",err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error parsing multipart form"))
+		return
+	}
+
+	// Get file from form
+	file,fileinfo,err:=r.FormFile("file")
+	if err!=nil{
+		log.Println("Error getting file from form: ",err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error getting file from form"))
+		return
+	}
+	defer file.Close()
+	log.Println("File uploaded: ",fileinfo.Filename)
+
+	var participants []models.Participants
+
+	// Creating a map to prevent duplicate entries
+	uidMap := make(map[string]bool)
+
+	// Read and manipulate the CSV data
+	csvReader := csv.NewReader(file)
+	for {
+		record, err := csvReader.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			http.Error(w, "Error reading CSV file", http.StatusInternalServerError)
+			return
+		}
+		var participant models.Participants
+
+		// Generating a unique id
+		uid,err:=utility.CreateRandomString(6)
+		if err!=nil{
+			log.Println("Error generating uid: ",err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		// Checking if the uid is already present in the map
+		for uidMap[uid]{
+			uid,err=utility.CreateRandomString(6)
+			if err!=nil{
+				log.Println("Error generating uid: ",err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+		// adding the unique string to the map
+		uidMap[uid]=true
+
+		participant.ParticapantID=eventid+"-"+uid
+		participant.Organisation=claims.Org
+		participant.Name=record[0]
+		participant.Email=record[1]
+		participant.EventID=eventid
+		participant.ScansCount=0
+
+		participants=append(participants,participant)
+	}
+
+	log.Println("Participants list generated: ",participants)
+
+	// Convert the array to []interface{}
+	var participantInterfaceSlice []interface{}
+	for _, participant := range participants {
+		participantInterfaceSlice = append(participantInterfaceSlice, participant)
+	}
+	
+	err=database.AddParticipantsToDb(participantInterfaceSlice)
+	if err!=nil{
+		log.Println("Error adding participants to database: ",err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("Participants list uploaded successfully")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Participants list uploaded successfully"))	
+	
 }

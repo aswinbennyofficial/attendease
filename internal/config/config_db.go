@@ -45,3 +45,13 @@ func LoadMongoDBCollectionEvent() string{
 	}
 	return DB_COLLECTION_NAME
 }
+
+func LoadMongoDBCollectionParticipant() string{
+	
+	DB_COLLECTION_NAME:=os.Getenv("DB_COLLECTION_FOR_PARTICIPANT")
+	if DB_COLLECTION_NAME==""{
+		log.Println("Error loading DB_COLLECTION_FOR_PARTICIPANT in config.LoadMongoDBCollectionName()")
+		return "participants"
+	}
+	return DB_COLLECTION_NAME
+}

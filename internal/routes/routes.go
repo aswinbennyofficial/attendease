@@ -23,6 +23,7 @@ func Routes(r *chi.Mux) {
 	r.With(middleware.AdminLoginRequired).Post("/api/events", controllers.HandleCreateEvent) // Create event
 	r.With(middleware.AdminLoginRequired).Get("/api/events", controllers.HandleGetEvents)   // Get all events
 	r.With(middleware.AdminLoginRequired).Get("/api/events/{eventid}", controllers.HandleGetAnEvent) // Get event by eventid
+	r.With(middleware.AdminLoginRequired).Post("/api/events/{eventid}/participants", controllers.HandleUploadParticipants) // Upload participants list to event
 
 	
 

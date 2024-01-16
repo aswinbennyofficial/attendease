@@ -14,6 +14,9 @@ import (
 // has mongodb collection object for login
 var Eventcoll *mongo.Collection
 
+// has mongodb collection object for partcipant list
+var Participantcoll *mongo.Collection
+
 // InitLoginCollection initializes the mongodb collection for login
 func InitEventCollection(client *mongo.Client, dbName, collName string) error {
 	// Initialisinbg nongodb collection object for login
@@ -21,6 +24,11 @@ func InitEventCollection(client *mongo.Client, dbName, collName string) error {
 	return nil
 }
 
+func InitParticipantCollection(client *mongo.Client, dbName, collName string) error {
+	// Initialisinbg nongodb collection object for login
+	Participantcoll = client.Database(dbName).Collection(collName)
+	return nil
+}
 
 func AddEventToDb(event models.Event) error {
 	// Inserting the event into the database
@@ -54,7 +62,7 @@ func GetAnEventFromDb(organisation string,eventid string) (models.Event, error) 
 	// Getting an event from the database
 	//filter := bson.D{{"eventid", eventid} , {"organisation", organisation}}
 	filter :=bson.D{{"$and", bson.A{     bson.D{{"eventid", eventid}},     bson.D{{"organisation", organisation}}, }}}
-	
+
 	var event models.Event
 	err := Eventcoll.FindOne(context.Background(), filter).Decode(&event)
 	if err != nil {
@@ -62,4 +70,15 @@ func GetAnEventFromDb(organisation string,eventid string) (models.Event, error) 
 		return event, err
 	}
 	return event, nil
+}
+
+
+func AddParticipantsToDb(participants []interface{}) error {
+	// Inserting the participant into the database
+	_, err := Participantcoll.InsertMany(context.Background(), participants)
+	if err != nil {
+		log.Println("Error while inserting participant into database: ", err)
+		return err
+	}
+	return nil
 }
