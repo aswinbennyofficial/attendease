@@ -10,6 +10,7 @@ import (
 	"github.com/aswinbennyofficial/attendease/internal/utility"
 )
 
+// LoginRequired is a middleware that checks if the user is logged in and is admin
 func AdminLoginRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Parse and validate JWT from request
@@ -60,6 +61,7 @@ func AdminLoginRequired(next http.Handler) http.Handler {
 	})
 }
 
+// LoginRequired is a middleware that checks if the user is logged in
 func LoginRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Parse and validate JWT from request

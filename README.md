@@ -1,7 +1,7 @@
 # AttendEase (WIP)
 Streamline event management with AttendEase. Effortlessly generate and send unique QR-coded tickets to attendees. Implement a QR code scanner for seamless check-ins. 
 
-### Features
+### Features in progress
 - [x] **1. Create an organisation account and allow login**
   - [x] Design and implement organization account creation functionality.
   - [x] Implement login functionality for organization accounts.

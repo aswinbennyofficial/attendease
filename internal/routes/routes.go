@@ -31,6 +31,7 @@ func Routes(r *chi.Mux) {
 	r.With(middleware.AdminLoginRequired).Get("/api/employees", controllers.HandleGetEmployees)   // Get all employees
 	r.Post("/api/employees/login", controllers.HandleEmployeeSignin) // Employee login
 
-	
+	// API for scanning
+	r.With(middleware.LoginRequired).Post("/api/events/scan", controllers.HandleScan) // Scan a participant
 
 }

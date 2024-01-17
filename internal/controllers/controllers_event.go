@@ -46,7 +46,7 @@ func HandleCreateEvent(w http.ResponseWriter, r *http.Request) {
 	doesEventIDexist:=true
 	for doesEventIDexist{
 		event.EventId,err=utility.CreateRandomString(6)
-		doesEventIDexist,err= database.DoesExistInAuthColl("eventid",event.EventId)
+		doesEventIDexist,err= database.DoesExistInEventColl("eventid",event.EventId)
 	}
 	log.Println("EventID generated: ",event.EventId)
 
@@ -238,4 +238,48 @@ func HandleUploadParticipants(w http.ResponseWriter, r *http.Request){
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Participants list uploaded successfully"))	
 	
+}
+
+func HandleScan(w http.ResponseWriter, r *http.Request){
+	// Get claims from context
+	claims, ok := r.Context().Value("claims").(*models.Claims)
+	if !ok {
+		log.Println("Claims not found in context")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Claims not found in context"))
+		return
+	}
+
+	var scanmodel models.ScanInput
+	err:=json.NewDecoder(r.Body).Decode(&scanmodel)
+	if err!=nil{
+		log.Println("Error decoding scanmodel in HandleScan()")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	participantName,scancount,err:=database.AddScanToDb(claims.Org,scanmodel.ParticipantID,claims.Username)
+	if err!=nil{
+		if err== mongo.ErrNoDocuments{
+			log.Println("Participant not found in database: ",err)
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Participant not found in database"))
+			return
+		}
+		log.Println("Error adding scan to database: ",err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("Scan added to database of ", participantName, " ", scancount)
+
+	var scanresponse models.ScanResponse
+	scanresponse.Name=participantName
+	scanresponse.ScansCount=scancount
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(scanresponse)
+
+
 }

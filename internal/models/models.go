@@ -37,3 +37,13 @@ type Participants struct{
 type EmployeeResponse struct{
 	Employees []string `json:"employees"`
 }
+
+type ScanInput struct{
+	ParticipantID string `json:"participantid"`
+}
+
+
+type ScanResponse struct{
+	Name string `json:"name"`
+	ScansCount int `json:"scancount"`
+}

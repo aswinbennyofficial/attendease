@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/aswinbennyofficial/attendease/internal/models"
 	//"go.mongodb.org/mongo-driver/bson"
@@ -81,4 +82,33 @@ func AddParticipantsToDb(participants []interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func AddScanToDb(organisation string,participantId string, employee string) (string,int,error){
+
+	
+    filter := bson.D{{"$and", bson.A{     bson.D{{"organisation", organisation}},     bson.D{{"particapantid", participantId}}, }}}
+
+    // Define the update operation
+    update := bson.D{
+        {"$inc", bson.D{{"Scanscount", 1}}},
+        {"$push", bson.D{{"ScansInfo", models.ScanInfo{Timestamp: time.Now(), ScannedBy: employee}}}},
+    }
+
+    // Perform the update
+    _, err := Participantcoll.UpdateOne(context.Background(), filter, update)
+    if err != nil {
+        log.Println("Error while updating participant in database: ", err)
+        return "", 0, err
+    }
+
+	 // Retrieve the updated participant
+	 var updatedParticipant models.Participants
+	 err = Participantcoll.FindOne(context.Background(), filter).Decode(&updatedParticipant)
+	 if err != nil {
+		 log.Println("Error while getting updated participant from database: ", err)
+		 return "", 0, err
+	 }
+	return updatedParticipant.Name,updatedParticipant.ScansCount,nil
+
 }
