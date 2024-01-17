@@ -141,3 +141,29 @@ func GetEmployeesFromDb(organisation string) ([]string, error) {
 
 	return results, nil
 }
+
+func GetHashFromEmployeeColl(organisation string,username string) (string, error) {
+	// Checking if user exists
+	isUserExist, err := DoesEmpExist(organisation,username)
+	if err != nil {
+		log.Println("GetHashFromEmployeeColl() :", err)
+		return "", err
+	}
+	if isUserExist == false {
+		return "", errors.New("Employee does not exist")
+	}
+
+	// Creating a filter
+	filter := bson.D{{"$and", bson.A{     bson.D{{"organisation", organisation}},     bson.D{{"username", username}}, }}}
+
+	// Instance of the NewUser struct
+	var result models.NewUser
+
+	// Find and decode from mongodb
+	err = employeecoll.FindOne(context.Background(), filter).Decode(&result)
+	if err != nil {
+		log.Println("GetPasswordHashFromDb() ", err)
+		return "", err
+	}
+	return result.Password, nil
+}

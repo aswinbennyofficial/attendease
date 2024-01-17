@@ -29,6 +29,8 @@ func Routes(r *chi.Mux) {
 	// API for creating employees
 	r.With(middleware.AdminLoginRequired).Post("/api/employees", controllers.HandleCreateEmployee) // Create employee
 	r.With(middleware.AdminLoginRequired).Get("/api/employees", controllers.HandleGetEmployees)   // Get all employees
+	r.Post("/api/employees/login", controllers.HandleEmployeeSignin) // Employee login
+
 	
 
 }

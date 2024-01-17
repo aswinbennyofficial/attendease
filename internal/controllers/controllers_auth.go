@@ -63,7 +63,7 @@ func HandleAdminSignin(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("JWT GENERATED FOR %s", creds.Organisation)
 
-	// TODO
+	
 	// Setting expiration time for cookie
 	expirationTime := time.Now().Add(time.Duration(config.LoadJwtExpiresIn()) * time.Minute)
 
@@ -341,5 +341,76 @@ func HandleGetEmployees(w http.ResponseWriter, r *http.Request){
 	w.WriteHeader(http.StatusOK)
 	
 	json.NewEncoder(w).Encode(employeeRes)
+
+}
+
+func HandleEmployeeSignin(w http.ResponseWriter, r *http.Request) {
+	
+	// Instance of the Credential struct
+	var creds models.LoginCreds
+	// Get the JSON body and decode into creds
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if creds.Organisation==""{
+		log.Println("Organisation cannot be empty")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Organisation cannot be empty"))
+		return
+	}
+
+	if creds.Username==""{
+		log.Println("Username cannot be empty")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Username cannot be empty"))
+		return
+	}
+
+	// Get the expected password hash from database
+	expectedPasswordHashEmployee, err := database.GetHashFromEmployeeColl(creds.Organisation,creds.Username)
+
+	if err != nil {
+		log.Println("Error while getting password from database: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		if err.Error() == "Employee does not exist" {
+			w.Write([]byte("Employee does not exist"))
+			return
+		}
+		w.Write([]byte("Error while getting password from database"))
+		return
+	}
+
+	if utility.CheckPasswordHash(creds.Password, expectedPasswordHashEmployee)==false {
+		log.Println("Incorrect password")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("Incorrect password"))
+		return
+	}
+
+	// Create a new JWT token
+	signedToken, err := utility.GenerateToken(creds.Organisation,creds.Username,false,true)
+	if err != nil {
+		log.Println("ERROR OCCURRED WHILE CREATING JWT TOKEN: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error occurred while creating JWT token " + err.Error()))
+		return
+	}
+
+	log.Printf("JWT GENERATED FOR employee %s", creds.Username)
+	// Setting expiration time for cookie
+	expirationTime := time.Now().Add(time.Duration(config.LoadJwtExpiresIn()) * time.Minute)
+
+	http.SetCookie(w, &http.Cookie{
+		Name:    "JWtoken",
+		Value:   signedToken,
+		Path:    "/",
+		Expires: expirationTime,
+	})
+
+	w.Write([]byte("Login successful"))
+
 
 }
