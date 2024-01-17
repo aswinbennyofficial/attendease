@@ -21,7 +21,7 @@ Streamline event management with AttendEase. Effortlessly generate and send uniq
 
 - [ ] **5. Scan QR to mark attendance**
   - [ ] Develop QR code scanning functionality.
-  - [ ] Implement attendance marking logic.
+  - [x] Implement attendance marking logic.
 
 - [ ] **6. Get list of attended and missed in form of Excel**
   - [ ] Create functionality to generate attendance reports.
