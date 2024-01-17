@@ -261,6 +261,12 @@ func HandleCreateEmployee(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
+	if employee.Username==claims.Username{
+		log.Println("Cannot create employee with same username as admin")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Cannot create employee with same username as admin"))
+		return
+	}
 	
 
 	// Check if username already exists

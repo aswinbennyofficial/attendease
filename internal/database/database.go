@@ -91,8 +91,8 @@ func AddScanToDb(organisation string,participantId string, employee string) (str
 
     // Define the update operation
     update := bson.D{
-        {"$inc", bson.D{{"Scanscount", 1}}},
-        {"$push", bson.D{{"ScansInfo", models.ScanInfo{Timestamp: time.Now(), ScannedBy: employee}}}},
+        {"$inc", bson.D{{"scanscount", 1}}},
+        {"$push", bson.D{{"scansinfo", models.ScanInfo{Timestamp: time.Now(), ScannedBy: employee}}}},
     }
 
     // Perform the update

@@ -30,7 +30,7 @@ type Participants struct{
 	Email string `json:"email"`
 	EventID string `json:"eventid"`
 	ScansCount int `json:"scancount"`
-	ScansInfo []ScanInfo `json:"scansinfo"`
+	//ScansInfo []ScanInfo `json:"scansinfo"`
 
 }
 
