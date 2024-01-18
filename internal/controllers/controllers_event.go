@@ -158,9 +158,22 @@ func HandleUploadParticipants(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
+	// Check if event exists in database
+	doesEventIDexist,err:= database.DoesEventExistInSameOrg(claims.Org,eventid)
+	if err!=nil{
+		log.Println("Error checking if event exists in database: ",err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if !doesEventIDexist{
+		log.Println("Event does not exist in database")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Event does not exist in database"))
+		return
+	}
 	
 	// Parse multipart form
-	err:=r.ParseMultipartForm(10<<20)
+	err=r.ParseMultipartForm(10<<20)
 	if err!=nil{
 		log.Println("Error parsing multipart form: ",err)
 		w.WriteHeader(http.StatusBadRequest)

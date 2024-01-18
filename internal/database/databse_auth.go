@@ -103,6 +103,26 @@ func DoesExistInEventColl(query string,value string) (bool, error) {
 	}
 }
 
+// Check if event exist in the same organisation
+func DoesEventExistInSameOrg(org string,eventid string) (bool, error) {
+	opts := options.Count().SetHint("_id_")
+	// Creating a filter
+	filter := bson.D{{"$and", bson.A{     bson.D{{"organisation", org}},     bson.D{{"eventid", eventid}}, }}}
+	// Counting the number of documents
+	count, err := Eventcoll.CountDocuments(context.TODO(), filter, opts)
+	if err != nil {
+		log.Println(err)
+		return true, err
+	}
+	if count == 0 {
+		return false, nil
+	} else {
+		return true, nil
+	}
+}
+
+
+
 // Check if Employee exist in the same table
 func DoesEmpExist(org string,username string) (bool, error) {
 	opts := options.Count().SetHint("_id_")
