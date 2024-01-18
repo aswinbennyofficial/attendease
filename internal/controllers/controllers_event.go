@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/aswinbennyofficial/attendease/internal/config"
@@ -435,6 +436,12 @@ func HandleGetParticipantsFile(w http.ResponseWriter, r *http.Request){
 		}
 	}
 
+	defer func() {
+		if err := os.Remove("AllParticipants.xlsx"); err != nil {
+			log.Println("Error deleting XLSX file:", err)
+		}
+    }()
+
 	// Save xlsx file by the given path.
 	if err := f.SaveAs("AllParticipants.xlsx"); err != nil {
 		log.Println(err)
@@ -442,6 +449,7 @@ func HandleGetParticipantsFile(w http.ResponseWriter, r *http.Request){
 		return
 
 	}
+
 
 	w.Header().Set("Content-Disposition", "attachment; filename=AllParticipants.xlsx")
 	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
