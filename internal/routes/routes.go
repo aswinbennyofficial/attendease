@@ -34,4 +34,10 @@ func Routes(r *chi.Mux) {
 	// API for scanning
 	r.With(middleware.LoginRequired).Post("/api/events/scan", controllers.HandleScan) // Scan a participant
 
+	// API participants in an event
+	r.With(middleware.AdminLoginRequired).Get("/api/events/{eventid}/participants", controllers.HandleGetParticipants) // Get all participants of an event
+
+	r.With(middleware.AdminLoginRequired).Get("/api/events/{eventid}/participants/file", controllers.HandleGetParticipantsFile) // Get all participants of an event in a file
+	
+
 }

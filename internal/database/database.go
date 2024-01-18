@@ -112,3 +112,21 @@ func AddScanToDb(organisation string,participantId string, employee string) (str
 	return updatedParticipant.Name,updatedParticipant.ScansCount,nil
 
 }
+
+func GetParticipantsFromDb(organisation string, event string)([]models.Participants,error){
+	filter := bson.D{{"$and", bson.A{     bson.D{{"organisation", organisation}},     bson.D{{"eventid", event}}, }}}
+
+	cursor, err := Participantcoll.Find(context.Background(), filter)
+	if err != nil {
+		log.Println("Error while getting participants from database: ", err)
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+	var participants []models.Participants
+	for cursor.Next(context.Background()) {
+		var participant models.Participants
+		cursor.Decode(&participant)
+		participants = append(participants, participant)
+	}
+	return participants, nil
+}
