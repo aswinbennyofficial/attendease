@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aswinbennyofficial/attendease/internal/models"
+	"github.com/aswinbennyofficial/attendease/internal/utility"
 	//"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -129,4 +130,30 @@ func GetParticipantsFromDb(organisation string, event string)([]models.Participa
 		participants = append(participants, participant)
 	}
 	return participants, nil
+}
+
+func SendEmailToParticipants(eventid string) error{
+	filter := bson.D{{"eventid", eventid}}
+	cursor, err := Participantcoll.Find(context.Background(), filter)
+	if err != nil {
+		log.Println("Error while getting participants from database: ", err)
+		return err
+	}
+	defer cursor.Close(context.Background())
+	var participants []models.Participants
+	for cursor.Next(context.Background()) {
+		var participant models.Participants
+		cursor.Decode(&participant)
+		participants = append(participants, participant)
+	}
+	
+
+	err=utility.EmailQueueSender(participants)
+	if err != nil {
+		log.Println("Error while queuing email to participants: ", err)
+		return err
+	}
+
+	return nil
+
 }

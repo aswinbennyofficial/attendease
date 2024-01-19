@@ -36,6 +36,7 @@ Streamline event management with AttendEase. Effortlessly generate and send uniq
 - [jwt](https://github.com/golang-jwt/jwt/v5): Golang implementation of JSON Web Tokens (JWT).
 - [bcrypt](https://golang.org/x/crypto/bcrypt): A library for hashing and comparing passwords using bcrypt algorithm.
 - [excelize](github.com/xuri/excelize) : A library for manipulating excel sheets
+- [amqp091-go](github.com/rabbitmq/amqp091-go) : A library to implement queue using rabbitMQ
 
 ## Installation
 

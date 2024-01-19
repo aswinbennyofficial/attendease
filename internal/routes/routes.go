@@ -38,6 +38,8 @@ func Routes(r *chi.Mux) {
 	r.With(middleware.AdminLoginRequired).Get("/api/events/{eventid}/participants", controllers.HandleGetParticipants) // Get all participants of an event
 
 	r.With(middleware.AdminLoginRequired).Get("/api/events/{eventid}/participants/file", controllers.HandleGetParticipantsFile) // Get all participants of an event in a file
+
+	r.With(middleware.AdminLoginRequired).Get("/api/events/{eventid}/send", controllers.HandleSendEmail) // Sents email to all participants of an event
 	
 
 }

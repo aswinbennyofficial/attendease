@@ -22,3 +22,6 @@ func CreateRandomString(length int) (string, error) {
 	return result.String(), nil
 
 }
+
+
+

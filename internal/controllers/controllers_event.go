@@ -470,3 +470,31 @@ func HandleGetParticipantsFile(w http.ResponseWriter, r *http.Request){
 
 	
 }
+
+func HandleSendEmail(w http.ResponseWriter, r *http.Request){
+	// Get claims from context
+	_, ok := r.Context().Value("claims").(*models.Claims)
+	if !ok {
+		log.Println("Claims not found in context")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Claims not found in context"))
+		return
+	}
+	
+	eventid:=chi.URLParam(r, "eventid")
+	if eventid==""{
+		log.Println("EventID is empty")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err:=database.SendEmailToParticipants(eventid)
+	if err!=nil{
+		log.Println("Error sending email to participants: ",err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Email Queued successfully"))
+}
