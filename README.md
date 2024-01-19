@@ -37,6 +37,7 @@ Streamline event management with AttendEase. Effortlessly generate and send uniq
 - [bcrypt](https://golang.org/x/crypto/bcrypt): A library for hashing and comparing passwords using bcrypt algorithm.
 - [excelize](github.com/xuri/excelize) : A library for manipulating excel sheets
 - [amqp091-go](github.com/rabbitmq/amqp091-go) : A library to implement queue using rabbitMQ
+- [go-qrcode](github.com/skip2/go-qrcode) : A library to generate QR code
 
 ## Installation
 

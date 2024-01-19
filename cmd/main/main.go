@@ -23,6 +23,7 @@ func main() {
 	DB_COLLECTION_FOR_EVENT:=config.LoadMongoDBCollectionEvent()
 	DB_COLLECTION_FOR_PARTICIPANT:=config.LoadMongoDBCollectionParticipant()
 	DB_COLLECTION_FOR_EMPLOYEE:=config.LoadMongoDBCollectionEmployee()
+	
 
 	// Creating a MongoDB client using Db() function in db.go
 	client := database.DbConnect(DB_URI)

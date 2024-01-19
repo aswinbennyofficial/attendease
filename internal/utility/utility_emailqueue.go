@@ -4,10 +4,12 @@ import (
 	"context"
 	"log"
 	"time"
+	
 
 	"github.com/aswinbennyofficial/attendease/internal/config"
 	"github.com/aswinbennyofficial/attendease/internal/models"
 	amqp "github.com/rabbitmq/amqp091-go"
+	
 )
 
 // Helper function to check the return value for each amqp call:
@@ -20,6 +22,9 @@ func failOnError(err error, msg string) {
 
 func EmailQueueSender(participants []models.Participants) error{
 	RABBIT_MQ_URI:=config.LoadRabbitMQURI()
+
+	
+
 	// Connect to RabbitMQ server
 	conn, err := amqp.Dial(RABBIT_MQ_URI)
 	failOnError(err, "Failed to connect to RabbitMQ")
@@ -58,6 +63,8 @@ func EmailQueueSender(participants []models.Participants) error{
 			})
 		failOnError(err, "Failed to publish a message")
 		log.Printf(" [x] queued %s\n", body)
+
+		
 	}
 	return nil
 }
