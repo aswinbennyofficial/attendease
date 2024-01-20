@@ -20,7 +20,7 @@ func failOnError(err error, msg string) {
 }
 
 
-func EmailQueueSender(participants []models.Participants) error{
+func EmailQueueSender(participants []models.Participants,event models.Event) error{
 	RABBIT_MQ_URI:=config.LoadRabbitMQURI()
 
 	
@@ -51,7 +51,8 @@ func EmailQueueSender(participants []models.Participants) error{
 
 	for _, participant := range participants{ 
 		// Publish a message to the queue
-		body := participant.Email+","+participant.Name+","+participant.ParticapantID
+		body := participant.Email+":&:"+participant.Name+":&:"+participant.ParticapantID+":&:"+event.EventName+":&:"+event.EventDate+":&:"+event.EventTime+":&:"+event.EventLocation+":&:"+event.EventDescription
+
 		err = ch.PublishWithContext(ctx,
 			"",     // exchange
 			q.Name, // routing key

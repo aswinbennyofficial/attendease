@@ -85,8 +85,8 @@ func main() {
 		  log.Printf("Received a message: %s", d.Body)
 
 		  // Split the message into email, name and participant ID
-		  substring:=strings.Split(string(d.Body), ",")
-		  if len(substring) != 3 {
+		  substring:=strings.Split(string(d.Body), ":&:")
+		  if len(substring) != 8 {
 			  log.Println("Invalid queue element format",d.Body)
 			  continue
 		  }
@@ -94,6 +94,12 @@ func main() {
 		  email:=substring[0]
 		  name:=substring[1]
 		  participantID:=substring[2]
+		  eventName:=substring[3]
+		  eventDate:=substring[4]
+		  eventTime:=substring[5]
+		  eventLocation:=substring[6]
+		  eventDescription:=substring[7]
+
 
 		  // Generate QR code
 		qrCode, err := generateQRCode(participantID)
@@ -112,7 +118,7 @@ func main() {
 		 
 			// Create email body
 			subject := "You are invited 2"
-			body := fmt.Sprintf("<html><body><h1>Hi %s,</h1> <br>this is an HTML-rich email template!<br><img src=\"cid:qrcode\"></body></html>", name)
+			body := fmt.Sprintf("<html><body><h1>Hi %s,</h1> <p>You are invited to %s happening at %s %s on location %s</p> <p>%s</p> <p>this is an HTML-rich email template!<p><br><img src=\"cid:qrcode\"></body></html>", name, eventName, eventDate, eventTime, eventLocation, eventDescription)
 
 			// Create MIME email with embedded image
 			msg := []byte(
@@ -148,7 +154,7 @@ func main() {
 
 		}
 		
-		log.Println("All messages sent")
+		
 		
 	  }()
 	  

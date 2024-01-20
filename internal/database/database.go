@@ -146,9 +146,12 @@ func SendEmailToParticipants(eventid string) error{
 		cursor.Decode(&participant)
 		participants = append(participants, participant)
 	}
+
+	// fetching event details
+	event,err:=GetAnEventFromDb(participants[0].Organisation,eventid)
 	
 
-	err=utility.EmailQueueSender(participants)
+	err=utility.EmailQueueSender(participants,event)
 	if err != nil {
 		log.Println("Error while queuing email to participants: ", err)
 		return err
