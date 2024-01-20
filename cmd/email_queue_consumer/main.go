@@ -80,83 +80,79 @@ func main() {
 	  var forever chan struct{}
 	  
 	  // Create a goroutine to consume messages from the queue
-	  go func() {
-		for d := range msgs {
-		  log.Printf("Received a message: %s", d.Body)
-
-		  // Split the message into email, name and participant ID
-		  substring:=strings.Split(string(d.Body), ":&:")
-		  if len(substring) != 8 {
-			  log.Println("Invalid queue element format",d.Body)
-			  continue
-		  }
-
-		  email:=substring[0]
-		  name:=substring[1]
-		  participantID:=substring[2]
-		  eventName:=substring[3]
-		  eventDate:=substring[4]
-		  eventTime:=substring[5]
-		  eventLocation:=substring[6]
-		  eventDescription:=substring[7]
-
-
-		  // Generate QR code
-		qrCode, err := generateQRCode(participantID)
-		if err != nil {
-			log.Println("Error generating QR code:", err)
-			continue
-		}
-
-		// Convert QR code to PNG
-		pngData, err := convertQRCodeToPNG(qrCode)
-		if err != nil {
-			log.Println("Error converting QR code to PNG:", err)
-			continue
-		}
-
-		 
+	  
+	  for d := range msgs {
+		go func(messageDelivery amqp.Delivery) {
+			log.Printf("Received a message: %s", messageDelivery.Body)
+	
+			// Split the message into email, name, and participant ID
+			substring := strings.Split(string(messageDelivery.Body), ":&:")
+			if len(substring) != 8 {
+				log.Println("Invalid queue element format", messageDelivery.Body)
+				return
+			}
+	
+			email := substring[0]
+			name := substring[1]
+			participantID := substring[2]
+			eventName := substring[3]
+			eventDate := substring[4]
+			eventTime := substring[5]
+			eventLocation := substring[6]
+			eventDescription := substring[7]
+	
+			// Generate QR code
+			qrCode, err := generateQRCode(participantID)
+			if err != nil {
+				log.Println("Error generating QR code:", err)
+				return
+			}
+	
+			// Convert QR code to PNG
+			pngData, err := convertQRCodeToPNG(qrCode)
+			if err != nil {
+				log.Println("Error converting QR code to PNG:", err)
+				return
+			}
+	
 			// Create email body
 			subject := "You are invited 2"
 			body := fmt.Sprintf("<html><body><h1>Hi %s,</h1> <p>You are invited to %s happening at %s %s on location %s</p> <p>%s</p> <p>this is an HTML-rich email template!<p><br><img src=\"cid:qrcode\"></body></html>", name, eventName, eventDate, eventTime, eventLocation, eventDescription)
-
+	
 			// Create MIME email with embedded image
 			msg := []byte(
 				"From: " + FROM_EMAIL + "\r\n" +
-				"Reply-To: " + REPLY_TO + "\r\n" +
-				"Subject: " + subject + "\r\n" +
-				"MIME-version: 1.0;\nContent-Type: multipart/related; boundary=\"related_boundary\";\r\n" +
-				"\r\n" +
-				"--related_boundary\r\n" +
-				"Content-Type: text/html; charset=\"UTF-8\";\r\n" +
-				"\r\n" +
-				body + "\r\n" +
-				"--related_boundary\r\n" +
-				"Content-Type: image/png; name=\"qrcode.png\"\r\n" +
-				"Content-Disposition: inline; filename=\"qrcode.png\"\r\n" +
-				"Content-ID: <qrcode>\r\n" +
-				"Content-Transfer-Encoding: base64\r\n" +
-				"\r\n" +
-				pngData + "\r\n" +
-				"--related_boundary--")
-
+					"Reply-To: " + REPLY_TO + "\r\n" +
+					"Subject: " + subject + "\r\n" +
+					"MIME-version: 1.0;\nContent-Type: multipart/related; boundary=\"related_boundary\";\r\n" +
+					"\r\n" +
+					"--related_boundary\r\n" +
+					"Content-Type: text/html; charset=\"UTF-8\";\r\n" +
+					"\r\n" +
+					body + "\r\n" +
+					"--related_boundary\r\n" +
+					"Content-Type: image/png; name=\"qrcode.png\"\r\n" +
+					"Content-Disposition: inline; filename=\"qrcode.png\"\r\n" +
+					"Content-ID: <qrcode>\r\n" +
+					"Content-Transfer-Encoding: base64\r\n" +
+					"\r\n" +
+					pngData + "\r\n" +
+					"--related_boundary--")
+	
 			// Recipient email
 			recieverEmail := []string{email}
-
+	
 			err = smtp.SendMail(SMTP_HOST+":"+SMTP_PORT, auth, FROM_EMAIL, recieverEmail, msg)
-
+	
 			// Handle errors
 			if err != nil {
 				log.Println(err)
-				continue
+				return
 			}
 			log.Println("Email sent successfully to ", email)
-
-		}
-		
-		
-		
-	  }()
+	
+		}(d)
+	}
 	  
 	  log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	 // Loop forever 
