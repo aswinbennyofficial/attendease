@@ -37,6 +37,7 @@ func main() {
 	// Setup authentication variable for email
 	auth := smtp.PlainAuth("", SMTP_USERNAME, SMTP_PASSWORD, SMTP_HOST)
 
+
 	if REPLY_TO == "" {
 		REPLY_TO = FROM_EMAIL
 	}
@@ -79,13 +80,15 @@ func main() {
 	  // Create a channel to receive messages from the queue
 	  var forever chan struct{}
 	  
-	  // Create a goroutine to consume messages from the queue
+	 
 	  
 	  for d := range msgs {
+
+		 // Create a goroutine to consume messages from the queue
 		go func(messageDelivery amqp.Delivery) {
 			log.Printf("Received a message: %s", messageDelivery.Body)
 	
-			// Split the message into email, name, and participant ID
+			// Split the message into substrings using the delimiter ":&:"
 			substring := strings.Split(string(messageDelivery.Body), ":&:")
 			if len(substring) != 8 {
 				log.Println("Invalid queue element format", messageDelivery.Body)
@@ -116,7 +119,7 @@ func main() {
 			}
 	
 			// Create email body
-			subject := "You are invited 2"
+			subject := "You are invited to " + eventName + "! 🎉"
 			body := fmt.Sprintf("<html><body><h1>Hi %s,</h1> <p>You are invited to %s happening at %s %s on location %s</p> <p>%s</p> <p>this is an HTML-rich email template!<p><br><img src=\"cid:qrcode\"></body></html>", name, eventName, eventDate, eventTime, eventLocation, eventDescription)
 	
 			// Create MIME email with embedded image
@@ -141,7 +144,7 @@ func main() {
 	
 			// Recipient email
 			recieverEmail := []string{email}
-	
+			// Send email
 			err = smtp.SendMail(SMTP_HOST+":"+SMTP_PORT, auth, FROM_EMAIL, recieverEmail, msg)
 	
 			// Handle errors
@@ -161,7 +164,7 @@ func main() {
 }
 
 
-
+// Generate QR code
 func generateQRCode(data string) (*qrcode.QRCode, error) {
 	qrCode, err := qrcode.New(data, qrcode.Medium)
 	if err != nil {
@@ -170,6 +173,7 @@ func generateQRCode(data string) (*qrcode.QRCode, error) {
 	return qrCode, nil
 }
 
+// Convert QR code to PNG
 func convertQRCodeToPNG(qrCode *qrcode.QRCode) (string, error) {
 	// Create a new PNG image from the QR code
 	pngData, err := qrCode.PNG(256)

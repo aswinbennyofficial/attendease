@@ -10,17 +10,16 @@ Streamline event management with AttendEase. Effortlessly generate and send uniq
   - [x] Develop event creation functionality.
   - [x] Implement CSV file upload feature for participant details.
 
-- [ ] **3. Send invitation emails to all participants with QR ticket and event info**
-  - [ ] Set up email integration for sending invitations.
-  - [ ] Generate QR tickets for participants.
-  - [ ] Include event information in invitation emails.
+- [x] **3. Send invitation emails to all participants with QR ticket and event info**
+  - [x] Set up email integration for sending invitations.
+  - [x] Generate QR tickets for participants.
+  - [x] Include event information in invitation emails.
 
 - [x] **4. Create employee account inside the organisation for scanning QR**
   - [x] Implement employee account creation within the organization.
   - [x] Set up login functionality for employees.
 
-- [ ] **5. Scan QR to mark attendance**
-  - [ ] Develop QR code scanning functionality.
+- [x] **5. Scan QR to mark attendance**
   - [x] Implement attendance marking logic.
 
 - [x] **6. Get list of attended and missed in form of Excel**

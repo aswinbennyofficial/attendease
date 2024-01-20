@@ -21,6 +21,7 @@ func failOnError(err error, msg string) {
 
 
 func EmailQueueSender(participants []models.Participants,event models.Event) error{
+	// Loading RabbitMQ URI from env variables
 	RABBIT_MQ_URI:=config.LoadRabbitMQURI()
 
 	
@@ -49,10 +50,14 @@ func EmailQueueSender(participants []models.Participants,event models.Event) err
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// Traversing every item in the participent array
 	for _, participant := range participants{ 
-		// Publish a message to the queue
+		// Creating the body of the message 
+		// Body format: email:&:name:&:participantid:&:eventname:&:eventdate:&:eventtime:&:eventlocation:&:eventdescription
+
 		body := participant.Email+":&:"+participant.Name+":&:"+participant.ParticapantID+":&:"+event.EventName+":&:"+event.EventDate+":&:"+event.EventTime+":&:"+event.EventLocation+":&:"+event.EventDescription
 
+		// Publishing the message to the queue
 		err = ch.PublishWithContext(ctx,
 			"",     // exchange
 			q.Name, // routing key
