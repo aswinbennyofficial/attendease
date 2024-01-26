@@ -27,6 +27,49 @@ Streamline event management with AttendEase. Effortlessly generate and send uniq
   - [x] Export reports to Excel format.
 
   
+## Routes
+
+Health Check:
+  - Endpoint: `/health`
+  - Handler: controllers.HandleHealth
+
+
+Private Endpoint (Requires Admin Login):
+  - Endpoint: `/private`
+  - Handler: controllers.HandlePrivate
+  - Middleware: middleware.AdminLoginRequired
+
+Admin Authentication and Authorization:
+  - Sign in: `/api/admin/login`
+  - Sign up: `/api/admin/signup`
+  - Refresh token:`/api/admin/refresh`
+  - Logout: `/api/logout`
+
+Event Management:
+  - Create event: `/api/events` (POST)
+  - Get all events: `/api/events` (GET)
+  - Get a specific event by ID: `/api/events/{eventid}` (GET)
+  - Upload participants for an event: `/api/events/{eventid}/participants` (POST)
+  - Middleware for these routes: middleware.AdminLoginRequired
+
+Employee Management:
+  - Create employee: `/api/employees` (POST)
+  - Get all employees: `/api/employees` (GET)
+  - Employee login: `/api/employees/login` (POST)
+  - Middleware for these routes: middleware.AdminLoginRequired
+
+Scanning:
+  - Scan a participant: `/api/events/scan` (POST)
+  - Middleware: middleware.LoginRequired
+
+Participant Management in an Event:
+  - Get all participants of an event: `/api/events/{eventid}/participants` (GET)
+  - Get all participants of an event in a file: `/api/events/{eventid}/participants/file` (GET)
+  - Send email to all participants of an event: `/api/events/{eventid}/send` (GET)
+  - Middleware: middleware.AdminLoginRequired
+
+
+[<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://god.gw.postman.com/run-collection/30160615-b18996b7-589a-4589-8772-db4820a41cd3?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D30160615-b18996b7-589a-4589-8772-db4820a41cd3%26entityType%3Dcollection%26workspaceId%3D854bfee7-441b-4733-a866-80484917b281)
 
 ## Dependencies
 
