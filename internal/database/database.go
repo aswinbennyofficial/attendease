@@ -136,6 +136,7 @@ func SendEmailToParticipants(eventid string) error{
 	filter := bson.D{{"eventid", eventid}}
 	cursor, err := Participantcoll.Find(context.Background(), filter)
 	if err != nil {
+
 		log.Println("Error while getting participants from database: ", err)
 		return err
 	}
@@ -149,6 +150,10 @@ func SendEmailToParticipants(eventid string) error{
 
 	// fetching event details
 	event,err:=GetAnEventFromDb(participants[0].Organisation,eventid)
+	if err != nil {
+		log.Println("Error while getting event from database: ", err)
+		return err
+	}
 	
 
 	err=utility.EmailQueueSender(participants,event)

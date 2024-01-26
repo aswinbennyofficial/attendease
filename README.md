@@ -1,4 +1,4 @@
-# AttendEase (WIP)
+# AttendEase 
 Streamline event management with AttendEase. Effortlessly generate and send unique QR-coded tickets to attendees. Implement a QR code scanner for seamless check-ins. 
 
 ### Features in progress
@@ -58,9 +58,20 @@ go mod tidy
 
 
 ## Usage
-### Running the application
+### Running the main application
 
 ```bash
 go run ./cmd/main/
+```
+
+### Start RabbitMQ 
+- I am using Docker to run it
+```bash
+docker run --rm -it -p 15672:15672 -p 5672:5672 rabbitmq:3-management
+```
+
+### Running email sender with workers
+```bash
+go run ./cmd/email_queue_consumer/
 ```
 By default, the server will start on port 8080.
